@@ -18,10 +18,10 @@ def readRegister(register, addr):
     try:
         rr = client.read_holding_registers(register, 1, unit=addr)
     except:
-        result = "Read error, exception"
+        result = "Read error, exception at addr: " + repr(register) + ":" + repr(addr)
     else:
-        if (rr.function_code >= 0x80):
-            result = "Read error"
+        if (not(hasattr(rr, function_code)) or rr.function_code >= 0x80):
+            result = "Read error at addr: " + repr(register) + ":" + repr(addr)
         else:
             result = rr.registers[0]
             print(repr(register) + ":" + repr(addr) + ": " + repr(result))
