@@ -17,12 +17,14 @@ def readRegister(register, addr):
 
     try:
         rr = client.read_holding_registers(register, 1, unit=addr)
-        result = rr.registers[0]
-        print(repr(register) + ":" + repr(addr) + ": " + repr(result))
     except:
-        result = "Read error, exception at addr: " + repr(register) + ":" + repr(addr)
-        print(repr(result))
-        pass
+        result = "Read error, exception"
+    else:
+        if (rr.function_code >= 0x80):
+            result = "Read error"
+        else:
+            result = rr.registers[0]
+            print(repr(register) + ":" + repr(addr) + ": " + repr(result))
 
 CP_ADDR = 0x01
 GEO_ADDR = 0x04
