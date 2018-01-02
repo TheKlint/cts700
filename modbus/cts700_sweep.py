@@ -21,6 +21,7 @@ def readRegister(register, addr):
         print(repr(register) + ":" + repr(addr) + ": " + repr(result))
     except:
         result = "Read error, exception at addr: " + repr(register) + ":" + repr(addr)
+        print(repr(result))
         pass
 
 CP_ADDR = 0x01
