@@ -17,11 +17,13 @@ import pytesseract
 import time
 import os
 import shutil
+import io
+import picamera
 
 picturePath = "/tmp/water/"
 #picturePath = "./water/"
 outputFolder = '/tmp/'
-latestPicture = picturePath + "latest.jpg"
+#latestPicture = picturePath + "latest.jpg"
 
 if not os.path.exists(picturePath):
     os.makedirs(picturePath)
@@ -40,15 +42,15 @@ filename = picturePath + "water_" + timestr + ".jpg"
 # -ex antishake -ifx sketch -cfx 128:128
 
 
-call(["raspistill",
-      "-t", "2000",
-      "-o", filename,
-      "-rot", "90",
-      "-sh", "100",
-      "-cfx", "128:128",
-      "-co", "100",
-      "-ex", "antishake"
-      ])
+#call(["raspistill",
+#      "-t", "2000",
+#      "-o", filename,
+#      "-rot", "90",
+#      "-sh", "100",
+#      "-cfx", "128:128",
+#      "-co", "100",
+#      "-ex", "antishake"
+#      ])
 
 bar10 = (1333, 1225)
 bar20 = (1372, 1225)
@@ -61,8 +63,26 @@ bar80 = (1608, 1225)
 bar90 = (1646, 1225)
 bar100 = (1688, 1225)
 
-img = Image.open(filename)
-#print("Size: " + repr(img.size))
+# Create the in-memory stream
+stream = io.BytesIO()
+with picamera.PiCamera() as camera:
+    camera.resolution = (2592, 1944)
+    camera.start_preview()
+    time.sleep(2)
+    camera.capture(stream, format='jpeg')
+# "Rewind" the stream to the beginning so we can read its content
+stream.seek(0)
+img = Image.open(stream)
+print("Size: " + repr(img.size))
+img = img.rotate(-90)
+print("Size: " + repr(img.size))
+igm = img.convert('LA') #Grayscale
+#igm = img.convert('gray') #Grayscale
+
+
+
+#img = Image.open(filename)
+print("Size: " + repr(img.size))
 #img2 = img.crop((1137,1209,204,81))
 #img2 = img.crop((1137,1183,1252,1257)).filter(ImageFilter.FIND_EDGES)
 #img3 = img.crop((1134,1123,1299,1184))
@@ -75,7 +95,7 @@ img = Image.open(filename)
 #call(["cat", "img2.txt"])
 #call(["tesseract", "tank.jpg", "tank", "-psm", "6", "-l", "eng"])
 #call(["cat", "tank.txt"])
-shutil.copy(filename, latestPicture)
+#shutil.copy(filename, latestPicture)
 
 brightness10 = sum(img.getpixel(bar10))/3
 brightness20 = sum(img.getpixel(bar20))/3
@@ -117,12 +137,14 @@ if os.path.isfile(outputFolder + "waterlevel"):
     f = open(outputFolder + "waterlevel",'r')
     oldLevel = int(f.read().rstrip())
     print("Previous water level: " + repr(oldLevel))
-if oldLevel == level :
-    print("Same water level as last time - no need to keep the picture")
-    os.remove(filename)
-f = open(outputFolder + "waterlevel",'w')
-print(repr(level), file=f)
-print(outputFolder + "waterlevel")
+
+if oldLevel != level:
+    print("Different water level than last time - save the picture")
+    img.save(filename)
+    #f = open(outputFolder + "waterlevel",'w')
+    #print(repr(level), file=f)
+
+#print(outputFolder + "waterlevel")
 
 #os.system("scp -vvv /tmp/waterlevel klint@10.0.0.8:/tmp/waterlevel > scpNOK.txt 2>&1")
 #call(["scp", "-vvv", outputFolder + "waterlevel", "klint@10.0.0.8:/tmp/"])
