@@ -13,7 +13,7 @@ try:
 except ImportError:
     from PIL import Image
     from PIL import ImageFilter
-import pytesseract
+#import pytesseract
 import time
 import os
 import shutil
@@ -123,10 +123,6 @@ if oldLevel == level :
 f = open(outputFolder + "waterlevel",'w')
 print(repr(level), file=f)
 print(outputFolder + "waterlevel")
-
-#os.system("scp -vvv /tmp/waterlevel klint@10.0.0.8:/tmp/waterlevel > scpNOK.txt 2>&1")
-#call(["scp", "-vvv", outputFolder + "waterlevel", "klint@10.0.0.8:/tmp/"])
-#scp /tmp/waterlevel klint@10.0.0.8:/tmp
 
 #print("Brightness 10% : " + repr(brightness10))
 #print("Brightness 20% : " + repr(brightness20))
