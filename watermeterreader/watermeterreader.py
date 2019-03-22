@@ -27,7 +27,8 @@ if not os.path.exists(picturePath):
     os.makedirs(picturePath)
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
-filename = picturePath + "water_" + timestr + ".jpg"
+levelPlaceHolder = "LEVEL"
+filename = picturePath + "water_" + timestr + "-" + levelPlaceHolder + ".jpg"
 
 #call(["raspistill",
 #      "-t", "2000",
@@ -117,12 +118,15 @@ if os.path.isfile(outputFolder + "waterlevel"):
     f = open(outputFolder + "waterlevel",'r')
     oldLevel = int(f.read().rstrip())
     print("Previous water level: " + repr(oldLevel))
-if oldLevel == level :
+if oldLevel == level:
     print("Same water level as last time - no need to keep the picture")
     os.remove(filename)
-f = open(outputFolder + "waterlevel",'w')
-print(repr(level), file=f)
-print(outputFolder + "waterlevel")
+else:
+    newFilename = filename.replace(levelPlaceHolder, repr(level))
+    shutil.move(filename, newFilename)
+    f = open(outputFolder + "waterlevel",'w')
+    print(repr(level), file=f)
+    print(outputFolder + "waterlevel")
 
 #print("Brightness 10% : " + repr(brightness10))
 #print("Brightness 20% : " + repr(brightness20))
